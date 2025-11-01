@@ -5,16 +5,16 @@ import { buildApp, setupGracefulShutdown } from './utils/server.utils.js';
 async function start(app) {
 	try {
 		await connectDatabase();
-		app.log.info('[Server] Database connection established');
+		app.log.info('Database connection established');
 
 		await app.listen({
 			port: envConfig.PORT,
 			host: '0.0.0.0',
 		});
 
-		app.log.info(`[Server] Successfully started in ${envConfig.MODE} mode`);
+		app.log.info(`Successfully started in ${envConfig.MODE} mode`);
 	} catch (error) {
-		app.log.error(error, '[Server] Failed to start server');
+		app.log.error({ error }, 'Failed to start server');
 		process.exit(1);
 	}
 }

@@ -1,22 +1,25 @@
 import Fastify from 'fastify';
 import { errorHandler } from 'nodefling';
-import { fastifyConfig } from '../configs/fastify.config.js';
+import { envConfig } from '../configs/env.config.js';
+import { getLoggerConfig } from './logger.utils.js';
 
 export function buildApp() {
-	const app = Fastify(fastifyConfig);
+	const app = Fastify({
+		logger: getLoggerConfig(),
+	});
 
 	app.setErrorHandler(errorHandler);
 
 	app.addHook('onReady', async () => {
-		app.log.info('[Server] Application ready, all plugins loaded');
+		app.log.info('Application ready, all plugins loaded');
 	});
 
 	app.addHook('onListen', () => {
-		app.log.info(`[Server] Server is now accepting connections on port ${envConfig.PORT}`);
+		app.log.info(`Server is now accepting connections on port ${envConfig.PORT}`);
 	});
 
 	app.addHook('onClose', async () => {
-		app.log.info('[Server] Server is shutting down gracefully');
+		app.log.info('Server is shutting down gracefully');
 	});
 
 	app.get('/health', async () => ({
@@ -31,13 +34,13 @@ export function buildApp() {
 
 export function setupGracefulShutdown(app) {
 	const gracefulShutdown = async (signal) => {
-		app.log.info(`[Server] ${signal} received, starting graceful shutdown`);
+		app.log.info(`${signal} received, starting graceful shutdown`);
 		try {
 			await app.close();
-			app.log.info('[Server] Server closed successfully');
+			app.log.info('Server closed successfully');
 			process.exit(0);
 		} catch (error) {
-			app.log.error(error, '[Server] Error during graceful shutdown');
+			app.log.error({ error }, 'Error during graceful shutdown');
 			process.exit(1);
 		}
 	};

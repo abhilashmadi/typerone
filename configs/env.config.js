@@ -13,6 +13,7 @@ const envSchema = z.object({
 
 	// Database Configuration
 	MONGO_URI: z.url().startsWith('mongodb').describe('MongoDB connection URI'),
+	DB_NAME: z.string(),
 });
 
 export const envConfig = envSchema.parse(process.env);
