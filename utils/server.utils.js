@@ -1,13 +1,18 @@
 import Fastify from 'fastify';
-import { errorHandler } from 'nodefling';
 import { envConfig } from '../configs/env.config.js';
+import { errorHandler } from '../handlers/error.handler.js';
+import responsePlugin from '../plugins/response.plugin.js';
 import { getLoggerConfig } from './logger.utils.js';
 
-export function buildApp() {
+export async function buildApp() {
 	const app = Fastify({
 		logger: getLoggerConfig(),
 	});
 
+	// Register response plugin
+	app.register(responsePlugin);
+
+	// Set global error handler
 	app.setErrorHandler(errorHandler);
 
 	app.addHook('onReady', async () => {
@@ -22,7 +27,7 @@ export function buildApp() {
 		app.log.info('Server is shutting down gracefully');
 	});
 
-	app.get('/health', async () => ({
+	app.get('/api/health', async () => ({
 		status: 'ok',
 		timestamp: new Date().toISOString(),
 		uptime: process.uptime(),

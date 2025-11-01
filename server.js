@@ -19,6 +19,6 @@ async function start(app) {
 	}
 }
 
-const app = buildApp();
+const app = await buildApp();
 setupGracefulShutdown(app);
 start(app);
