@@ -1,0 +1,25 @@
+{
+	"name": "typerone",
+	"version": "1.0.0",
+	"main": "server.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node --env-file=.development.env --watch --watch-preserve-output server.js",
+		"start": "node --env-file=.production.env server.js",
+		"prepare": "lefthook install",
+		"format": "biome format --write .",
+		"lint": "biome lint --write .",
+		"check": "biome check --write .",
+		"ci": "biome ci ."
+	},
+	"dependencies": {
+		"fastify": "^5.6.1",
+		"mongoose": "^8.19.2",
+		"nodefling": "^1.0.0",
+		"zod": "^4.1.12"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.2",
+		"lefthook": "^2.0.2"
+	}
+}

@@ -1,0 +1,17 @@
+# Lefthook configuration for Git hooks
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    biome-check:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    biome-ci:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc}"
+      run: npx @biomejs/biome ci --no-errors-on-unmatched --files-ignore-unknown=true
+
