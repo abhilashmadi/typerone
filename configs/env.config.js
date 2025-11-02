@@ -9,22 +9,20 @@ export const DEV_MODES = {
 export const envSchema = z.object({
 	// Server Configuration
 	PORT: z.coerce.number().int().positive().describe('Port number on which the server runs'),
-
 	MODE: z.enum(Object.values(DEV_MODES)),
 
 	// Database Configuration
 	MONGO_URI: z.url().startsWith('mongodb', { message: 'Must be a valid MongoDB URI' }).describe('Full MongoDB connection string'),
-
 	DB_NAME: z.string().min(1, { message: 'Database name cannot be empty' }).describe('MongoDB database name'),
 
-	// Authentication Configuration
-	BETTER_AUTH_URL: z.url().describe('Base URL for the BetterAuth service'),
+	// JWT Configuration
+	JWT_SECRET: z.string().min(32, { message: 'JWT secret must be at least 32 characters' }).describe('Secret key for signing JWT tokens'),
+	JWT_ACCESS_TOKEN_EXPIRY: z.string().describe('Access token expiry time (e.g., 15m, 1h)'),
+	JWT_REFRESH_TOKEN_EXPIRY: z.string().describe('Refresh token expiry time (e.g., 7d, 30d)'),
 
-	BETTER_AUTH_SECRET: z.string().min(1, { message: 'BetterAuth secret is required' }).describe('Secret key for BetterAuth integration'),
-
-	GITHUB_CLIENT_ID: z.string().min(1, { message: 'GitHub Client ID is required' }).describe('OAuth client ID for GitHub login'),
-
-	GITHUB_CLIENT_SECRET: z.string().min(1, { message: 'GitHub Client Secret is required' }).describe('OAuth client secret for GitHub login'),
+	// Cookie Configuration
+	COOKIE_SECRET: z.string().min(32, { message: 'Cookie secret must be at least 32 characters' }).describe('Secret key for signing cookies'),
+	COOKIE_DOMAIN: z.string().describe('Cookie domain'),
 });
 
 export const envConfig = envSchema.parse(process.env);

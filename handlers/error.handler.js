@@ -2,12 +2,8 @@ import { envConfig } from '../configs/env.config.js';
 import { AppException } from '../utils/exceptions.utils.js';
 import { StatusCodes } from '../utils/status-codes.utils.js';
 
-/**
- * Global Error Handler
- * Catches all exceptions and formats them using the response plugin
- */
 export async function errorHandler(error, request, reply) {
-	// Log the error
+	// Log all errors for monitoring
 	request.log.error(
 		{
 			err: error,
@@ -18,104 +14,75 @@ export async function errorHandler(error, request, reply) {
 		'Error occurred',
 	);
 
-	const isDevelopment = envConfig.MODE !== 'production';
+	const isDevelopment = envConfig.MODE === 'development';
 	const stack = isDevelopment ? error.stack : null;
 
-	// Handle custom AppException
+	// 1. Handle Fastify validation errors (JSON Schema) - Must check before statusCode
+	if (error.validation || error.code === 'FST_ERR_VALIDATION') {
+		const details = formatFastifyValidationErrors(error.validation, error.validationContext);
+		return reply.fail('Validation failed', StatusCodes.BAD_REQUEST, details);
+	}
+
+	// 2. Handle custom AppException
 	if (error instanceof AppException) {
 		const statusCode = error.statusCode;
+		const isClientError = statusCode >= 400 && statusCode < 500;
 
-		// Client errors (4xx) - use fail()
-		if (statusCode >= StatusCodes.BAD_REQUEST && statusCode < StatusCodes.INTERNAL_SERVER_ERROR) {
-			return reply.fail(error.message, statusCode, error.details);
-		}
-
-		// Server errors (5xx) - use error()
-		return reply.error(error.message, statusCode, stack);
+		return isClientError ? reply.fail(error.message, statusCode, error.details) : reply.error(error.message, statusCode, stack);
 	}
 
-	// Handle Zod validation errors
-	if (error.name === 'ZodError' && error.issues) {
-		const details = formatZodErrors(error.issues);
-		return reply.fail('Validation failed', StatusCodes.BAD_REQUEST, details);
+	// 3. Handle JWT errors
+	if (error.name === 'JsonWebTokenError') {
+		return reply.fail('Invalid token', StatusCodes.UNAUTHORIZED);
+	}
+	if (error.name === 'TokenExpiredError') {
+		return reply.fail('Token expired', StatusCodes.UNAUTHORIZED);
 	}
 
-	// Handle Fastify validation errors
-	if (error.validation || error.code === 'FST_ERR_VALIDATION') {
-		const details = error.validation ? formatValidationErrors(error.validation) : null;
-		return reply.fail('Validation failed', StatusCodes.BAD_REQUEST, details);
-	}
-
-	// Handle MongoDB duplicate key error
+	// 4. Handle MongoDB errors
 	if (error.code === 11000) {
 		const field = Object.keys(error.keyPattern || {})[0] || 'field';
-		return reply.fail(`Duplicate ${field}`, StatusCodes.CONFLICT);
+		return reply.fail(`${field} already exists`, StatusCodes.CONFLICT);
 	}
 
-	// Handle Mongoose validation error
+	// 5. Handle Mongoose validation errors
 	if (error.name === 'ValidationError' && error.errors) {
 		const details = formatMongooseErrors(error.errors);
 		return reply.fail('Validation failed', StatusCodes.BAD_REQUEST, details);
 	}
 
-	// Handle Mongoose cast error (invalid ObjectId)
+	// 6. Handle Mongoose cast errors (invalid ObjectId, etc.)
 	if (error.name === 'CastError') {
 		return reply.fail(`Invalid ${error.path}`, StatusCodes.BAD_REQUEST);
 	}
 
-	// Handle JWT errors
-	if (error.name === 'JsonWebTokenError') {
-		return reply.fail('Invalid token', StatusCodes.UNAUTHORIZED);
-	}
-
-	if (error.name === 'TokenExpiredError') {
-		return reply.fail('Token expired', StatusCodes.UNAUTHORIZED);
-	}
-
-	// Handle known Fastify errors with statusCode
+	// 7. Handle generic Fastify errors with statusCode
 	if (error.statusCode) {
-		// Client errors (4xx)
-		if (error.statusCode >= 400 && error.statusCode < 500) {
-			return reply.fail(error.message || 'Bad request', error.statusCode);
-		}
+		const isClientError = error.statusCode >= 400 && error.statusCode < 500;
 
-		// Server errors (5xx)
-		return reply.error(error.message || 'Server error', error.statusCode, stack);
+		const message = error.message || (isClientError ? 'Bad request' : 'Server error');
+		return isClientError ? reply.fail(message, error.statusCode) : reply.error(message, error.statusCode, stack);
 	}
 
-	// Default: Internal server error
+	// 8. Default: Internal server error
 	const message = isDevelopment ? error.message : 'Internal server error';
 	return reply.error(message, StatusCodes.INTERNAL_SERVER_ERROR, stack);
 }
 
-// Format Fastify validation errors
-function formatValidationErrors(validationErrors) {
+function formatFastifyValidationErrors(validationErrors, context) {
 	const errors = {};
 
-	for (const error of validationErrors) {
-		const field = error.instancePath ? error.instancePath.replace(/^\//, '').replace(/\//g, '.') : error.params?.missingProperty || 'unknown';
+	for (const err of validationErrors) {
+		// Determine field name from error
+		const field = err.instancePath?.replace(/^\//, '').replace(/\//g, '.') || err.params?.missingProperty || context || 'request';
 
+		// Initialize array if needed
 		if (!errors[field]) {
 			errors[field] = [];
 		}
 
-		errors[field].push(error.message);
-	}
-
-	return errors;
-}
-
-function formatZodErrors(issues) {
-	const errors = {};
-
-	for (const issue of issues) {
-		const field = issue.path.join('.') || 'unknown';
-
-		if (!errors[field]) {
-			errors[field] = [];
-		}
-
-		errors[field].push(issue.message);
+		// Add error message
+		errors[field].push(err.message || 'Invalid value');
 	}
 
 	return errors;
@@ -123,10 +90,8 @@ function formatZodErrors(issues) {
 
 function formatMongooseErrors(validationErrors) {
 	const errors = {};
-
 	for (const [field, error] of Object.entries(validationErrors)) {
 		errors[field] = [error.message];
 	}
-
 	return errors;
 }

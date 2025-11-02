@@ -1,105 +1,45 @@
+import { loginHandler } from '../handlers/auth-handlers/login.handler.js';
+import { logoutHandler } from '../handlers/auth-handlers/logout.handler.js';
+import { meHandler } from '../handlers/auth-handlers/me.handler.js';
+import { refreshHandler } from '../handlers/auth-handlers/refresh.handler.js';
+import { registerHandler } from '../handlers/auth-handlers/register.handler.js';
+import { authenticate } from '../lib/auth.middleware.js';
+import { validateRegistration } from '../lib/validators.js';
+import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
+
 /**
- * Authentication Routes
- * Handles user registration, login, logout, and token management
+ * Authentication routes
+ * Uses Fastify's native JSON Schema validation
+ * Validation errors are automatically handled by Fastify and caught by the global error handler
  */
 export default async function authRoutes(fastify, _options) {
-	// Register a new user
-	fastify.post('/register', async (request, reply) => {
-		// TODO: Implement user registration
-		// - Validate email and password
-		// - Hash password
-		// - Create user in database
-		// - Generate JWT token
-		const { email, username } = request.body;
-
-		return reply.success(
-			{
-				user: { id: '123', email, username },
-				token: 'jwt_token_placeholder',
-			},
-			201,
-		);
+	// Register endpoint with schema validation and custom business logic validation
+	fastify.post('/register', {
+		schema: registerSchema,
+		preHandler: validateRegistration,
+		handler: registerHandler,
 	});
 
-	// Login user
-	fastify.post('/login', async (request, reply) => {
-		// TODO: Implement user login
-		// - Validate credentials
-		// - Check password hash
-		// - Generate JWT token
-		// - Update last login timestamp
-		const { email } = request.body;
-
-		return reply.success({
-			user: { id: '123', email, username: 'testuser' },
-			token: 'jwt_token_placeholder',
-		});
+	// Login endpoint with schema validation
+	fastify.post('/login', {
+		schema: loginSchema,
+		handler: loginHandler,
 	});
 
-	// Logout user
-	fastify.post('/logout', async (_request, reply) => {
-		// TODO: Implement logout
-		// - Invalidate token (add to blacklist if using that approach)
-		// - Clear any session data
-
-		return reply.success({ message: 'Logged out successfully' });
+	// Refresh token endpoint
+	fastify.post('/refresh', {
+		handler: refreshHandler,
 	});
 
-	// Refresh JWT token
-	fastify.post('/refresh', async (_request, reply) => {
-		// TODO: Implement token refresh
-		// - Validate refresh token
-		// - Generate new access token
-
-		return reply.success({
-			token: 'new_jwt_token_placeholder',
-		});
+	// Logout endpoint (requires authentication)
+	fastify.post('/logout', {
+		preHandler: authenticate,
+		handler: logoutHandler,
 	});
 
-	// Verify email
-	fastify.post('/verify-email', async (_request, reply) => {
-		// TODO: Implement email verification
-		// - Validate verification token
-		// - Mark user email as verified
-
-		return reply.success({ message: 'Email verified successfully' });
-	});
-
-	// Request password reset
-	fastify.post('/forgot-password', async (_request, reply) => {
-		// TODO: Implement password reset request
-		// - Validate email exists
-		// - Generate reset token
-		// - Send reset email
-
-		return reply.success({
-			message: 'Password reset email sent',
-		});
-	});
-
-	// Reset password
-	fastify.post('/reset-password', async (_request, reply) => {
-		// TODO: Implement password reset
-		// - Validate reset token
-		// - Hash new password
-		// - Update user password
-
-		return reply.success({ message: 'Password reset successfully' });
-	});
-
-	// Get current authenticated user
-	fastify.get('/me', async (_request, reply) => {
-		// TODO: Implement get current user
-		// - Requires authentication middleware
-		// - Return user data from token
-
-		return reply.success({
-			user: {
-				id: '123',
-				email: 'user@example.com',
-				username: 'testuser',
-				createdAt: new Date().toISOString(),
-			},
-		});
+	// Get current user endpoint (requires authentication)
+	fastify.get('/me', {
+		preHandler: authenticate,
+		handler: meHandler,
 	});
 }
