@@ -1,6 +1,6 @@
 import z from 'zod';
 
-const DEV_MODES = {
+export const DEV_MODES = {
 	PROD: 'production',
 	DEV: 'development',
 	TEST: 'testing',

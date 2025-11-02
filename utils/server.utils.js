@@ -1,4 +1,7 @@
+import cors from '@fastify/cors';
 import Fastify from 'fastify';
+
+import { corsConfig } from '../configs/cors.config.js';
 import { envConfig } from '../configs/env.config.js';
 import { errorHandler } from '../handlers/error.handler.js';
 import responsePlugin from '../plugins/response.plugin.js';
@@ -8,6 +11,9 @@ export async function buildApp() {
 	const app = Fastify({
 		logger: getLoggerConfig(),
 	});
+
+	// Register cors plugin
+	app.register(cors, corsConfig);
 
 	// Register response plugin
 	app.register(responsePlugin);

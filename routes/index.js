@@ -6,7 +6,9 @@ import fp from 'fastify-plugin';
  */
 async function routesPlugin(fastify, _options) {
 	// Health check routes (no prefix, accessible at root)
-	await fastify.register(import('./health.routes.js'));
+	await fastify.register(import('./health.routes.js'), {
+		prefix: '/api',
+	});
 
 	// API routes
 	await fastify.register(import('./auth.routes.js'), {
