@@ -1,6 +1,6 @@
 import { envConfig } from './configs/env.config.js';
 import { connectDatabase } from './configs/mongoose.config.js';
-import { buildApp, setupGracefulShutdown } from './utils/server.utils.js';
+import { buildApp, setupGracefulShutdown } from './lib/app.js';
 
 async function start(app) {
 	try {

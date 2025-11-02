@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 // Register schema
 export const registerSchema = z.object({
-	email: z.string().email('Invalid email address'),
+	email: z.email('Invalid email address'),
 	password: z
 		.string()
 		.min(8, 'Password must be at least 8 characters')
@@ -39,7 +39,7 @@ export const verifyEmailSchema = z.object({
 
 // Forgot password schema
 export const forgotPasswordSchema = z.object({
-	email: z.string().email('Invalid email address'),
+	email: z.email('Invalid email address'),
 });
 
 // Reset password schema
