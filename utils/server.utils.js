@@ -12,6 +12,9 @@ export async function buildApp() {
 	// Register response plugin
 	app.register(responsePlugin);
 
+	// Register all application routes
+	await app.register(import('../routes/index.js'));
+
 	// Set global error handler
 	app.setErrorHandler(errorHandler);
 
@@ -26,13 +29,6 @@ export async function buildApp() {
 	app.addHook('onClose', async () => {
 		app.log.info('Server is shutting down gracefully');
 	});
-
-	app.get('/api/health', async () => ({
-		status: 'ok',
-		timestamp: new Date().toISOString(),
-		uptime: process.uptime(),
-		environment: envConfig.MODE,
-	}));
 
 	return app;
 }
