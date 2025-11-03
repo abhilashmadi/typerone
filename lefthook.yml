@@ -8,6 +8,8 @@ pre-commit:
       glob: "*.{js,jsx,ts,tsx,json,jsonc}"
       run: npx @biomejs/biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       stage_fixed: true
+    tests:
+      run: pnpm test
 
 pre-push:
   commands:

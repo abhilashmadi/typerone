@@ -13,31 +13,26 @@ import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
  * Validation errors are automatically handled by Fastify and caught by the global error handler
  */
 export default async function authRoutes(fastify, _options) {
-	// Register endpoint with schema validation and custom business logic validation
 	fastify.post('/register', {
 		schema: registerSchema,
 		preHandler: validateRegistration,
 		handler: registerHandler,
 	});
 
-	// Login endpoint with schema validation
 	fastify.post('/login', {
 		schema: loginSchema,
 		handler: loginHandler,
 	});
 
-	// Refresh token endpoint
 	fastify.post('/refresh', {
 		handler: refreshHandler,
 	});
 
-	// Logout endpoint (requires authentication)
 	fastify.post('/logout', {
 		preHandler: authenticate,
 		handler: logoutHandler,
 	});
 
-	// Get current user endpoint (requires authentication)
 	fastify.get('/me', {
 		preHandler: authenticate,
 		handler: meHandler,
