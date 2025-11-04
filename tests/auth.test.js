@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { REDIS_KEYS } from '../configs/redis.config.js';
 import { buildApp } from '../lib/app.js';
 import { generateResetToken } from '../lib/jwt.utils.js';
+import { REDIS_KEYS } from '../plugins/redis.plugin.js';
 import { StatusCodes } from '../utils/status-codes.utils.js';
 import {
 	createAuthenticatedUser,
@@ -26,7 +26,8 @@ describe('Authentication Flow Integration', () => {
 	let server;
 
 	beforeAll(async () => {
-		app = await buildApp();
+		// Pass the mock redis client to buildApp
+		app = await buildApp({ redisClient: redis });
 		await app.ready();
 		await app.listen({ port: 0 });
 		server = app.server;

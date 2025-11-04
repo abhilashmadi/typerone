@@ -1,7 +1,7 @@
-import { getRedisClient, REDIS_KEYS, REDIS_TTL } from '../../configs/redis.config.js';
 import { sendPasswordResetEmail } from '../../lib/email.utils.js';
 import { generateResetToken } from '../../lib/jwt.utils.js';
 import User from '../../models/user.model.js';
+import { REDIS_KEYS, REDIS_TTL } from '../../plugins/redis.plugin.js';
 import { StatusCodes } from '../../utils/status-codes.utils.js';
 
 /**
@@ -10,7 +10,8 @@ import { StatusCodes } from '../../utils/status-codes.utils.js';
  * Accepts either username or email as identifier
  */
 export async function forgotPasswordHandler(request, reply) {
-	const { identifier } = request.body;
+	const { body, redis } = request;
+	const { identifier } = body;
 
 	// Determine if identifier is email or username
 	const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
@@ -27,8 +28,6 @@ export async function forgotPasswordHandler(request, reply) {
 			StatusCodes.OK,
 		);
 	}
-
-	const redis = getRedisClient();
 
 	// Check if there's already a recent reset request (rate limiting by email)
 	const existingToken = await redis.get(REDIS_KEYS.PASSWORD_RESET_BY_EMAIL(user.email));

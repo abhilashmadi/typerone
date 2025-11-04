@@ -1,7 +1,7 @@
-import { getRedisClient, REDIS_KEYS } from '../../configs/redis.config.js';
 import { sendPasswordChangedEmail } from '../../lib/email.utils.js';
 import { hashToken } from '../../lib/jwt.utils.js';
 import User from '../../models/user.model.js';
+import { REDIS_KEYS } from '../../plugins/redis.plugin.js';
 import { BadRequestException, NotFoundException } from '../../utils/exceptions.utils.js';
 import { StatusCodes } from '../../utils/status-codes.utils.js';
 
@@ -10,12 +10,11 @@ import { StatusCodes } from '../../utils/status-codes.utils.js';
  * Validates reset token from Redis and updates user password
  */
 export async function resetPasswordHandler(request, reply) {
-	const { token, password } = request.body;
+	const { redis, body } = request;
+	const { token, password } = body;
 
 	// Hash the token to match stored format
 	const hashedToken = hashToken(token);
-
-	const redis = getRedisClient();
 
 	// Get user ID from Redis
 	const userId = await redis.get(REDIS_KEYS.PASSWORD_RESET(hashedToken));

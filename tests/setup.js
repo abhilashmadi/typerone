@@ -7,7 +7,6 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { afterAll, afterEach, beforeAll } from 'vitest';
-import { resetRedisClient, setRedisClient } from '../configs/redis.config.js';
 import { getMockRedis, resetMockRedis } from './helpers/redis-mock.js';
 
 let mongoServer;
@@ -19,7 +18,6 @@ let redis;
 beforeAll(async () => {
 	// Set up mock Redis client
 	redis = getMockRedis();
-	setRedisClient(redis);
 	console.log('✓ Mock Redis client initialized for testing');
 
 	// Create in-memory MongoDB instance
@@ -56,7 +54,6 @@ afterAll(async () => {
 	console.log('✓ Disconnected from in-memory MongoDB');
 
 	// Clean up Redis
-	resetRedisClient();
 	resetMockRedis();
 	console.log('✓ Mock Redis client cleaned up');
 });
