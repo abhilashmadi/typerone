@@ -15,6 +15,8 @@ process.env.JWT_ACCESS_TOKEN_EXPIRY = '15m';
 process.env.JWT_REFRESH_TOKEN_EXPIRY = '7d';
 process.env.COOKIE_SECRET = 'test-cookie-secret-for-testing-only';
 process.env.COOKIE_DOMAIN = 'localhost';
+process.env.UPSTASH_REDIS_REST_URL = 'http://redis-client.url';
+process.env.UPSTASH_REDIS_REST_TOKEN = 'upstash-redis-rest-token';
 
 let mongoServer;
 

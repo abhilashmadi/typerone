@@ -28,6 +28,21 @@ export function getRedisClient() {
 }
 
 /**
+ * Set the Redis client (used for testing to inject mock)
+ * @param {Redis} client - Redis client instance
+ */
+export function setRedisClient(client) {
+	redisClient = client;
+}
+
+/**
+ * Reset the Redis client (used for testing)
+ */
+export function resetRedisClient() {
+	redisClient = null;
+}
+
+/**
  * Redis key prefixes for different data types
  */
 export const REDIS_KEYS = {

@@ -2,7 +2,6 @@ import { getRedisClient, REDIS_KEYS, REDIS_TTL } from '../../configs/redis.confi
 import { sendPasswordResetEmail } from '../../lib/email.utils.js';
 import { generateResetToken } from '../../lib/jwt.utils.js';
 import User from '../../models/user.model.js';
-import { NotFoundException } from '../../utils/exceptions.utils.js';
 import { StatusCodes } from '../../utils/status-codes.utils.js';
 
 /**
@@ -19,13 +18,14 @@ export async function forgotPasswordHandler(request, reply) {
 	// Find user by email or username
 	const user = await User.findOne(isEmail ? { email: identifier } : { username: identifier });
 
-	if (!user) {
-		throw new NotFoundException('No account found with that username or email address');
-	}
-
-	// Check if user is active
-	if (!user.isActive) {
-		throw new NotFoundException('No account found with that username or email address');
+	// Return success message even if user doesn't exist (prevent email enumeration)
+	if (!user || !user.isActive) {
+		return reply.success(
+			{
+				message: 'If an account exists with that username or email, a password reset link has been sent.',
+			},
+			StatusCodes.OK,
+		);
 	}
 
 	const redis = getRedisClient();

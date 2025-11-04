@@ -40,14 +40,15 @@ export function formatCookieHeader(cookies) {
 /**
  * Creates a test user and returns authentication cookies
  * @param {Object} request - Supertest request object
- * @param {Object} userData - User data (username, password)
+ * @param {Object} userData - User data (username, email, password)
  * @returns {Promise<Object>} Object containing user data and cookies
  */
 export async function createAuthenticatedUser(request, userData = {}) {
 	const username = userData.username || generateTestUsername();
+	const email = userData.email || generateTestEmail(username);
 	const password = userData.password || 'Test123!@#';
 
-	const response = await request.post('/api/auth/register').send({ username, password, confirmPassword: password }).expect(201);
+	const response = await request.post('/api/auth/register').send({ username, email, password, confirmPassword: password }).expect(201);
 
 	const cookies = extractCookies(response);
 
@@ -55,6 +56,7 @@ export async function createAuthenticatedUser(request, userData = {}) {
 		user: response.body.data.user,
 		cookies,
 		username,
+		email,
 		password,
 		accessToken: cookies.accessToken,
 		refreshToken: cookies.refreshToken,
@@ -70,6 +72,16 @@ export function generateTestUsername() {
 	const timestamp = Date.now().toString().slice(-6); // Last 6 digits
 	const random = Math.random().toString(36).substring(2, 5); // 3 random chars
 	return `test${timestamp}${random}`;
+}
+
+/**
+ * Generates a valid test email
+ * @param {string} username - Optional username to include in email
+ * @returns {string} Valid email for testing
+ */
+export function generateTestEmail(username) {
+	const user = username || generateTestUsername();
+	return `${user}@example.com`;
 }
 
 /**
