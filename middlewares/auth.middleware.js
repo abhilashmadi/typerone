@@ -1,6 +1,6 @@
+import { verifyAccessToken } from '../lib/jwt.utils.js';
 import User from '../models/user.model.js';
 import { UnauthorizedException } from '../utils/exceptions.utils.js';
-import { verifyAccessToken } from './jwt.utils.js';
 
 export async function authenticate(request) {
 	const accessToken = request.cookies.accessToken;

@@ -5,8 +5,8 @@ import { meHandler } from '../handlers/auth-handlers/me.handler.js';
 import { refreshHandler } from '../handlers/auth-handlers/refresh.handler.js';
 import { registerHandler } from '../handlers/auth-handlers/register.handler.js';
 import { resetPasswordHandler } from '../handlers/auth-handlers/reset-password.handler.js';
-import { authenticate } from '../lib/auth.middleware.js';
 import { validateRegistration, validateResetPassword } from '../lib/validators.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
 import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from '../schemas/auth.schema.js';
 
 /**
