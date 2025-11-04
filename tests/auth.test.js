@@ -1,10 +1,9 @@
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { REDIS_KEYS, resetRedisClient, setRedisClient } from '../configs/redis.config.js';
+import { REDIS_KEYS } from '../configs/redis.config.js';
 import { buildApp } from '../lib/app.js';
 import { generateResetToken } from '../lib/jwt.utils.js';
 import { StatusCodes } from '../utils/status-codes.utils.js';
-import { getMockRedis } from './helpers/redis-mock.js';
 import {
 	createAuthenticatedUser,
 	extractCookies,
@@ -13,6 +12,7 @@ import {
 	generateTestPassword,
 	generateTestUsername,
 } from './helpers/test-helpers.js';
+import { redis } from './setup.js';
 
 /**
  * Comprehensive Authentication Integration Tests
@@ -24,13 +24,8 @@ import {
 describe('Authentication Flow Integration', () => {
 	let app;
 	let server;
-	let redis;
 
 	beforeAll(async () => {
-		// Inject mock Redis client for testing
-		redis = getMockRedis();
-		setRedisClient(redis);
-
 		app = await buildApp();
 		await app.ready();
 		await app.listen({ port: 0 });
@@ -39,8 +34,6 @@ describe('Authentication Flow Integration', () => {
 
 	afterAll(async () => {
 		await app.close();
-		// Reset Redis client after tests
-		resetRedisClient();
 	});
 
 	// ========================================

@@ -1,29 +1,27 @@
+/**
+ * Test Setup - Database and Redis Initialization
+ *
+ * Note: Environment variables are set in setup-env.js which runs before this file.
+ */
+
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { afterAll, afterEach, beforeAll } from 'vitest';
-
-/**
- * (Override environment variables)
- * Set up environment variables for testing before any imports
- */
-process.env.PORT = '3000';
-process.env.MODE = 'testing';
-process.env.MONGO_URI = 'mongodb://localhost:27017';
-process.env.DB_NAME = 'test-db';
-process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
-process.env.JWT_ACCESS_TOKEN_EXPIRY = '15m';
-process.env.JWT_REFRESH_TOKEN_EXPIRY = '7d';
-process.env.COOKIE_SECRET = 'test-cookie-secret-for-testing-only';
-process.env.COOKIE_DOMAIN = 'localhost';
-process.env.UPSTASH_REDIS_REST_URL = 'http://redis-client.url';
-process.env.UPSTASH_REDIS_REST_TOKEN = 'upstash-redis-rest-token';
+import { resetRedisClient, setRedisClient } from '../configs/redis.config.js';
+import { getMockRedis, resetMockRedis } from './helpers/redis-mock.js';
 
 let mongoServer;
+let redis;
 
 /**
- * Connect to in-memory MongoDB instance before all tests
+ * Connect to in-memory MongoDB instance and set up mock Redis before all tests
  */
 beforeAll(async () => {
+	// Set up mock Redis client
+	redis = getMockRedis();
+	setRedisClient(redis);
+	console.log('✓ Mock Redis client initialized for testing');
+
 	// Create in-memory MongoDB instance
 	mongoServer = await MongoMemoryServer.create();
 	const mongoUri = mongoServer.getUri();
@@ -42,6 +40,11 @@ afterEach(async () => {
 	for (const key in collections) {
 		await collections[key].deleteMany({});
 	}
+
+	// Clean up Redis data after each test
+	if (redis) {
+		await redis.flushall();
+	}
 });
 
 /**
@@ -51,4 +54,12 @@ afterAll(async () => {
 	await mongoose.disconnect();
 	await mongoServer.stop();
 	console.log('✓ Disconnected from in-memory MongoDB');
+
+	// Clean up Redis
+	resetRedisClient();
+	resetMockRedis();
+	console.log('✓ Mock Redis client cleaned up');
 });
+
+// Export redis instance for tests that need direct access
+export { redis };
