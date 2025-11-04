@@ -15,6 +15,10 @@ export const envSchema = z.object({
 	MONGO_URI: z.url().startsWith('mongodb', { message: 'Must be a valid MongoDB URI' }).describe('Full MongoDB connection string'),
 	DB_NAME: z.string().min(1, { message: 'Database name cannot be empty' }).describe('MongoDB database name'),
 
+	// Redis Configuration
+	UPSTASH_REDIS_REST_URL: z.url().describe('Upstash Redis REST URL'),
+	UPSTASH_REDIS_REST_TOKEN: z.string().min(1, { message: 'Redis token cannot be empty' }).describe('Upstash Redis REST token'),
+
 	// JWT Configuration
 	JWT_SECRET: z.string().min(32, { message: 'JWT secret must be at least 32 characters' }).describe('Secret key for signing JWT tokens'),
 	JWT_ACCESS_TOKEN_EXPIRY: z.string().describe('Access token expiry time (e.g., 15m, 1h)'),

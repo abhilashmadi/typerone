@@ -15,6 +15,15 @@ const userSchema = new Schema(
 			maxlength: [20, 'Username must not exceed 20 characters'],
 			index: true,
 		},
+		email: {
+			type: String,
+			required: [true, 'Email is required'],
+			unique: true,
+			trim: true,
+			lowercase: true,
+			match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please provide a valid email address'],
+			index: true,
+		},
 		password: {
 			type: String,
 			required: [true, 'Password is required'],
@@ -68,6 +77,7 @@ const userSchema = new Schema(
 // Indexes
 userSchema.index({ createdAt: -1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ email: 1 });
 
 userSchema.pre('save', async function (next) {
 	if (!this.isModified('password')) return next();

@@ -10,17 +10,27 @@ import { ConflictException } from '../../utils/exceptions.utils.js';
 import { StatusCodes } from '../../utils/status-codes.utils.js';
 
 export async function registerHandler(request, reply) {
-	const { username, password } = request.body;
+	const { username, email, password } = request.body;
 
-	const existingUser = await User.findOne({ username });
+	// Check if username or email already exists
+	const existingUser = await User.findOne({
+		$or: [{ username }, { email }],
+	});
+
 	if (existingUser) {
-		throw new ConflictException('Username already exists');
+		if (existingUser.username === username) {
+			throw new ConflictException('Username already exists');
+		}
+		if (existingUser.email === email) {
+			throw new ConflictException('Email already exists');
+		}
 	}
 
 	const sessionToken = generateSessionToken();
 
 	const user = await User.create({
 		username,
+		email,
 		password,
 		sessionToken,
 	});

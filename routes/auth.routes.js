@@ -1,11 +1,13 @@
+import { forgotPasswordHandler } from '../handlers/auth-handlers/forgot-password.handler.js';
 import { loginHandler } from '../handlers/auth-handlers/login.handler.js';
 import { logoutHandler } from '../handlers/auth-handlers/logout.handler.js';
 import { meHandler } from '../handlers/auth-handlers/me.handler.js';
 import { refreshHandler } from '../handlers/auth-handlers/refresh.handler.js';
 import { registerHandler } from '../handlers/auth-handlers/register.handler.js';
+import { resetPasswordHandler } from '../handlers/auth-handlers/reset-password.handler.js';
 import { authenticate } from '../lib/auth.middleware.js';
-import { validateRegistration } from '../lib/validators.js';
-import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
+import { validateRegistration, validateResetPassword } from '../lib/validators.js';
+import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from '../schemas/auth.schema.js';
 
 /**
  * Authentication routes
@@ -26,6 +28,17 @@ export default async function authRoutes(fastify, _options) {
 
 	fastify.post('/refresh', {
 		handler: refreshHandler,
+	});
+
+	fastify.post('/forgot-password', {
+		schema: forgotPasswordSchema,
+		handler: forgotPasswordHandler,
+	});
+
+	fastify.post('/reset-password', {
+		schema: resetPasswordSchema,
+		preHandler: validateResetPassword,
+		handler: resetPasswordHandler,
 	});
 
 	fastify.post('/logout', {
