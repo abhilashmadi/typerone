@@ -17,3 +17,4 @@ process.env.COOKIE_SECRET = 'test-cookie-secret-for-testing-only';
 process.env.COOKIE_DOMAIN = 'localhost';
 process.env.UPSTASH_REDIS_REST_URL = 'http://redis-client.url';
 process.env.UPSTASH_REDIS_REST_TOKEN = 'upstash-redis-rest-token';
+process.env.GITHUB_PAT = 'github-pat-key';

@@ -27,6 +27,9 @@ export const envSchema = z.object({
 	// Cookie Configuration
 	COOKIE_SECRET: z.string().min(32, { message: 'Cookie secret must be at least 32 characters' }).describe('Secret key for signing cookies'),
 	COOKIE_DOMAIN: z.string().describe('Cookie domain'),
+
+	// GitHub Configuration
+	GITHUB_PAT: z.string().min(1, { message: 'GitHub PAT cannot be empty' }).describe('GitHub Personal Access Token for API access'),
 });
 
 export const envConfig = envSchema.parse(process.env);

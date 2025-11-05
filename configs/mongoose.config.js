@@ -125,6 +125,7 @@ class MongooseConnection {
 
 		try {
 			const result = await this.connectionPromise;
+			logger.info('Database connection established');
 			return result;
 		} finally {
 			this.connectionPromise = null;

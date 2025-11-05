@@ -5,7 +5,6 @@ import { buildApp, setupGracefulShutdown } from './lib/app.js';
 async function start(app) {
 	try {
 		await connectDatabase();
-		app.log.info('Database connection established');
 
 		await app.listen({
 			port: envConfig.PORT,

@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import fp from 'fastify-plugin';
 import { envConfig } from '../configs/env.config.js';
+import { createLogger } from '../utils/logger.utils.js';
 
 /**
  * Redis key prefixes for different data types
@@ -16,6 +17,8 @@ export const REDIS_KEYS = {
 export const REDIS_TTL = {
 	PASSWORD_RESET: 300, // 5 minutes
 };
+
+const logger = createLogger('RedisCache');
 
 /**
  * Redis Fastify Plugin
@@ -45,7 +48,7 @@ async function redisPlugin(fastify, options) {
 
 	// Log when plugin is ready
 	fastify.addHook('onReady', async () => {
-		fastify.log.info('Redis plugin loaded and ready');
+		logger.info('Redis plugin loaded and ready');
 	});
 
 	// Optional: Add cleanup on close
