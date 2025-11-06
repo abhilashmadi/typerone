@@ -1,25 +1,8 @@
 import { StatusCodes } from '../utils/status-codes.utils.js';
-import { DEV_MODES, envConfig } from './env.config.js';
-
-/**
- * CORS Configuration for Fastify
- * @see https://github.com/fastify/fastify-cors
- */
-
-/**
- * Get allowed origins based on environment
- */
-function getAllowedOrigins() {
-	if (envConfig.MODE === DEV_MODES.DEV || envConfig.MODE === DEV_MODES.TEST) {
-		// Allow common development origins
-		return ['http://localhost:3000'];
-	}
-
-	return [envConfig.BETTER_AUTH_URL];
-}
+import { envConfig } from './env.config.js';
 
 export const corsConfig = {
-	origin: getAllowedOrigins(),
+	origin: envConfig.COOKIE_DOMAIN,
 	credentials: true,
 	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 	allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
